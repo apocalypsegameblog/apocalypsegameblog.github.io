@@ -15,6 +15,16 @@
       .sortoption {height: 20px; width: auto; text-align: center; background: none; border: none; color: #cacaca;}
       .sortoption:hover {background: #ffffff11; cursor: pointer;}
       .sortoption.active {border-bottom: 1px solid green;}
+
+      #posts {width: 100%; height: auto; max-height: calc(100% - 95px); margin-top: 4px; overflow: scroll; border-bottom: 1px solid #9a9a9a;}
+      .post {background: #1a1a1a; border-radius: 10px; height: 140px; width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; cursor: pointer; position: relative;}
+      .posttitle {font-size: 25px; font-weight: 500;}
+      .postuser {font-size: 10px; position: absolute; top: 30px; right: 138px; white-space: nowrap;}
+      .postcontent {font-size: 14px; font-weight: 300; display: -webkit-box; height: calc(100% - 45px); width: calc(100% - 128px); overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 5; line-clamp: 5;}
+      .postimages {display: block; height: calc(100% - 16px); width: 125px; background: #00000044; position: absolute; top: 8px; right: 8px; border-radius: 6px; background-size: cover; background-position: center;}
+      .imagecount {font-size: 12px; position: absolute; bottom: 3px; right: 3px; text-shadow: 0 0 4px #000000;}
+      .postid {font-size: 8px; position: absolute; bottom: 10px; left: 10px;}
+      .postdate {font-size: 8px; position: absolute; bottom: 10px; right: 138px;}
     </style>
   </head>
   <body>
@@ -22,13 +32,45 @@
       <span id="title">Recent Posts</span>
       <i class="fa fa-search" id="searchbutton"></i>
     </nav>
-    <span class="sortlabel">Sort by:</span
+    <span class="sortlabel">Sort by:</span>
     <div class="sortcontainer">
       <button class="sortoption active">Newest</button>
       <button class="sortoption">Oldest</button>
       <button class="sortoption">A-Z</button>
       <button class="sortoption">Z-A</button>
     </div>
-    <h2>(WIP) (WIP) (WIP) </h2>
+    <div id="posts">
+      <!-- javascript adds posts here -->
+    </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        fetch('posts.json')
+            .then(response => response.json())
+            .then(posts => {
+                const postsContainer = document.getElementById('posts');
+
+                posts.forEach(post => {
+                    const images = post['post-images'].split(', ');
+                    const firstImage = images[0];
+                    const additionalImages = images.length - 1;
+
+                    const postHTML = `
+                        <div class="post" postid="${post['post-id']}">
+                            <span class="posttitle">${post['post-title']}</span>
+                            <span class="postcontent">${post['post-content']}</span>
+                            <span class="postimages" style="background-image: url('${firstImage}')">
+                                ${additionalImages > 0 ? `<span class="imagecount">+${additionalImages}</span>` : ''}
+                            </span>
+                            <span class="postuser">${"posted by " + post['post-user']}</span>
+                            <span class="postdate">${post['post-date']}</span>
+                            <span class="postid">${"post id: " + post['post-id']}</span>
+                        </div>
+                    `;
+                    postsContainer.insertAdjacentHTML('beforeend', postHTML);
+                });
+            })
+          .catch(error => console.error('Error fetching posts:', error));
+      });
+    </script>
   </body>
 </html>
