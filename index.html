@@ -44,7 +44,7 @@
     </div>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        fetch('posts.json')
+        fetch('/resources/posts.json')
             .then(response => response.json())
             .then(posts => {
                 const postsContainer = document.getElementById('posts');
@@ -58,7 +58,7 @@
                         <div class="post" postid="${post['post-id']}">
                             <span class="posttitle">${post['post-title']}</span>
                             <span class="postcontent">${post['post-content']}</span>
-                            <span class="postimages" style="background-image: url('${firstImage}')">
+                            <span class="postimages" style="background-image: url('${`/resources/images/` + firstImage}')">
                                 ${additionalImages > 0 ? `<span class="imagecount">+${additionalImages}</span>` : ''}
                             </span>
                             <span class="postuser">${"posted by " + post['post-user']}</span>
