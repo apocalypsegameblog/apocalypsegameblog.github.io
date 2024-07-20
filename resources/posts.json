@@ -1,1 +1,35 @@
-[{text:"placeholder"}]
+[
+    {
+        "post-title": "firstest post title",
+        "post-content": "post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content post content ",
+        "post-images": "image1.png, image2.png",
+        "post-user": "wraithcode",
+        "post-date": "1/1/1111",
+        "post-id": 1
+    },
+    {
+        "post-title": "second post title",
+        "post-content": "second post content",
+        "post-images": "image3.png, image4.png",
+        "post-user": "SentientJS",
+        "post-date": "1/2/1111",
+        "post-id": 2
+    },
+    {
+        "post-title": "third post title",
+        "post-content": "third's post content",
+        "post-images": "image5.png, image6.png, image7.png",
+        "post-user": "Luke475",
+        "post-date": "1/5/1111",
+        "post-id": 3
+    },
+    {
+        "post-title": "fourth post title",
+        "post-content": "fourthsts post content",
+        "post-images": "image8.png, image9.png",
+        "post-user": "wraithcode",
+        "post-date": "2/23/1114",
+        "post-id": 4
+    }
+    
+]
