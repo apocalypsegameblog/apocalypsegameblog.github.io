@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Post Details - Bombs and Bolts Development Blog</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+  <style>
+    body {background: #101010; color: #e0e0e0; font-family: "Manrope"; margin: 10px;}
+    #post {background: #1a1a1a; border-radius: 10px; padding: 20px; max-width: 800px; margin: auto; position: relative;}
+    .posttitle {font-size: 35px; font-weight: 500; color: #e0e0e0;}
+    .postcontent {font-size: 18px; font-weight: 300; margin-top: 10px; width: calc(100% - 155px);}
+    .postinfo {font-size: 10px; margin-top: 10px; color: #cacaca;}
+    .backbutton {margin-top: 20px; display: block; font-size: 13px; text-align: center; color: #e0e0e0; text-decoration: underline; cursor: pointer;}
+    .slideshowbutton {position: absolute; top: 20px; right: 20px; width: 150px; height: 150px; background-size: cover; background-position: center; border: none; cursor: pointer; border-radius: 10px;}
+
+    .modal {display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); justify-content: center; align-items: center; z-index: 1000;}
+    .modal-content {position: relative; width: 80%; height: 80%; display: flex; align-items: center; justify-content: center;}
+    .modal-content img {max-height: 90vh; max-width: 90vw; min-height: 50px; min-width: 50px; display: block;}
+    .modal-close {position: absolute; top: 10px; right: 10px; font-size: 24px; color: #fff; cursor: pointer;}
+    .modal-prev, .modal-next {position: absolute; top: 50%; transform: translateY(-50%); font-size: 24px; color: #fff; cursor: pointer; user-select: none; font-size: 30px; text-shadow: 0 0 4px #000000;}
+    .modal-prev {left: 10px;}
+    .modal-next {right: 10px;}
+  </style>
+</head>
+<body>
+  <div id="post">
+    <div class="posttitle" id="post-title"></div>
+    <div class="postcontent" id="post-content"></div>
+    <div class="postinfo" id="post-info"></div>
+    <button class="slideshowbutton" id="slideshow-button">View Images</button>
+    <div class="backbutton" onclick="window.location.href='/';">Back to Posts</div>
+  </div>
+
+  <!-- Modal for Slideshow -->
+  <div class="modal" id="slideshow-modal">
+    <span class="modal-close" id="modal-close">&times;</span>
+    <div class="modal-content">
+      <img id="modal-image" src="" alt="Slideshow Image">
+      <span class="modal-prev" id="modal-prev">&lt;</span>
+      <span class="modal-next" id="modal-next">&gt;</span>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const postId = parseInt(urlParams.get('id'), 10);
+
+      if (postId) {
+        fetch('/resources/posts.json')
+          .then(response => response.json())
+          .then(posts => {
+            const post = posts.find(p => p['post-id'] === postId);
+            if (post) {
+              document.getElementById('post-title').textContent = post['post-title'];
+              document.getElementById('post-content').textContent = post['post-content'];
+              document.getElementById('post-info').textContent = `Posted by ${post['post-user']} on ${post['post-date']} | Post ID: ${post['post-id']}`;
+
+              const images = post['post-images'].split(', ');
+              const firstImage = images[0];
+              document.getElementById('slideshow-button').style.backgroundImage = `url('/resources/images/${firstImage}')`;
+
+              document.getElementById('slideshow-button').addEventListener('click', () => {
+                openModal(images);
+              });
+            } else {
+              document.getElementById('post').innerHTML = 'Post not found';
+            }
+          })
+          .catch(error => {
+            document.getElementById('post').innerHTML = 'Error fetching post data';
+            console.error('Error fetching post data:', error);
+          });
+      } else {
+        document.getElementById('post').innerHTML = 'No post ID provided';
+      }
+    });
+
+    function openModal(images) {
+      const modal = document.getElementById('slideshow-modal');
+      const modalImage = document.getElementById('modal-image');
+      let currentIndex = 0;
+
+      function showImage(index) {
+        modalImage.src = `/resources/images/${images[index]}`;
+        currentIndex = index;
+      }
+
+      document.getElementById('modal-close').addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+
+      document.getElementById('modal-prev').addEventListener('click', () => {
+        if (currentIndex > 0) {
+          showImage(currentIndex - 1);
+        }
+      });
+
+      document.getElementById('modal-next').addEventListener('click', () => {
+        if (currentIndex < images.length - 1) {
+          showImage(currentIndex + 1);
+        }
+      });
+
+      showImage(0);
+      modal.style.display = 'flex';
+    }
+  </script>
+</body>
+</html>
