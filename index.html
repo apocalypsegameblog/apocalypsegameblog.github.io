@@ -9,16 +9,16 @@
       body {background: #101010; height: calc(100vh - 20px); width: calc(100vw - 20px); color: #e0e0e0; font-family: "Manrope"; margin: 10px;}
       nav {height: auto; width: 100%; position: relative;}
       #title {font-size: 35px; font-weight: 500;}
-      #searchbutton {position: absolute; top: calc(50% - 10px); right: 0; font-size: 20px; cursor: pointer;}
+      .searchbutton {position: absolute; top: calc(50% - 10px); right: 0; font-size: 20px; cursor: pointer;}
       .sortlabel {font-weight: 450;}
       .sortcontainer {display: flex; flex-direction: row; height: 20px; width: 100%; margin-top: 4px;}
       .sortoption {height: 20px; width: auto; text-align: center; background: none; border: none; color: #cacaca;}
       .sortoption:hover {background: #ffffff11; cursor: pointer;}
-      .sortoption.active {border-bottom: 1px solid green;}
+      .sortoption.active {border-bottom: 1px solid #9a9a9a;}
 
       #posts {width: 100%; height: auto; max-height: calc(100% - 95px); margin-top: 4px; overflow: scroll; border-bottom: 1px solid #9a9a9a;}
-      .post {background: #1a1a1a; border-radius: 10px; height: 140px; width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; cursor: pointer; position: relative;}
-      .posttitle {font-size: 25px; font-weight: 500;}
+      .post {background: #1a1a1a; border-radius: 10px; height: 140px; width: calc(100% - 20px); padding: 10px; margin-bottom: 10px; position: relative;}
+      .posttitle {font-size: 25px; font-weight: 500; color: #e0e0e0; text-decoration: underline;}
       .postuser {font-size: 10px; position: absolute; top: 30px; right: 138px; white-space: nowrap; text-decoration: underline;}
       .postcontent {font-size: 14px; font-weight: 300; display: -webkit-box; height: calc(100% - 45px); width: calc(100% - 128px); overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 5; line-clamp: 5;}
       .postimages {display: block; height: calc(100% - 16px); width: 125px; background: #00000044; position: absolute; top: 8px; right: 8px; border-radius: 6px; background-size: cover; background-position: center;}
@@ -28,49 +28,88 @@
     </style>
   </head>
   <body>
+    <!-- MAIN -->
     <nav>
       <span id="title">Recent Posts</span>
-      <i class="fa fa-search" id="searchbutton"></i>
+      <i class="fa fa-search searchbutton" onclick="window.location.href='/search';"></i>
     </nav>
     <span class="sortlabel">Sort by:</span>
     <div class="sortcontainer">
-      <button class="sortoption active">Newest</button>
-      <button class="sortoption">Oldest</button>
-      <button class="sortoption">A-Z</button>
-      <button class="sortoption">Z-A</button>
+      <button class="sortoption active" onclick="sortPosts('newest')">Newest</button>
+      <button class="sortoption" onclick="sortPosts('oldest')">Oldest</button>
+      <button class="sortoption" onclick="sortPosts('a-z')">A-Z</button>
+      <button class="sortoption" onclick="sortPosts('z-a')">Z-A</button>
     </div>
     <div id="posts">
       <!-- javascript adds posts here -->
     </div>
+
+    <!-- SCRIPTS -->
     <script>
+      let postsData = [];
+
       document.addEventListener("DOMContentLoaded", () => {
         fetch('/resources/posts.json')
-            .then(response => response.json())
-            .then(posts => {
-                const postsContainer = document.getElementById('posts');
-
-                posts.forEach(post => {
-                    const images = post['post-images'].split(', ');
-                    const firstImage = images[0];
-                    const additionalImages = images.length - 1;
-
-                    const postHTML = `
-                        <div class="post" postid="${post['post-id']}">
-                            <span class="posttitle">${post['post-title']}</span>
-                            <span class="postcontent">${post['post-content']}</span>
-                            <span class="postimages" style="background-image: url('${`/resources/images/` + firstImage}')">
-                                ${additionalImages > 0 ? `<span class="imagecount">+${additionalImages}</span>` : ''}
-                            </span>
-                            <span class="postuser">${"posted by " + post['post-user']}</span>
-                            <span class="postdate">${post['post-date']}</span>
-                            <span class="postid">${"post id: " + post['post-id']}</span>
-                        </div>
-                    `;
-                    postsContainer.insertAdjacentHTML('beforeend', postHTML);
-                });
-            })
-          .catch(error => console.error('Error fetching posts:', error));
+          .then(response => response.json())
+          .then(posts => {
+            postsData = posts;
+            renderPosts(posts);
+          })
+          .catch(error => alert('Error fetching posts:', error));
       });
+
+      function renderPosts(posts) {
+        const postsContainer = document.getElementById('posts');
+        postsContainer.innerHTML = '';
+
+        posts.forEach(post => {
+          const images = post['post-images'].split(', ');
+          const firstImage = images[0];
+          const additionalImages = images.length - 1;
+
+          const postHTML = `
+            <div class="post" postid="${post['post-id']}">
+              <a class="posttitle" href="/post?id=${post['post-id']}">${post['post-title']}</a>
+              <span class="postcontent">${post['post-content']}</span>
+              <span class="postimages" style="background-image: url('${`/resources/images/` + firstImage}')">
+                ${additionalImages > 0 ? `<span class="imagecount">+${additionalImages}</span>` : ''}
+              </span>
+              <span class="postuser">${"posted by " + post['post-user']}</span>
+              <span class="postdate">${post['post-date']}</span>
+              <span class="postid">${"post id: " + post['post-id']}</span>
+            </div>
+          `;
+          postsContainer.insertAdjacentHTML('beforeend', postHTML);
+        });
+      }
+
+      function sortPosts(criteria) {
+        let sortedPosts;
+
+        switch(criteria) {
+          case 'newest':
+            sortedPosts = [...postsData].sort((a, b) => new Date(b['post-date']) - new Date(a['post-date']));
+            document.getElementById('title').textContent = 'Recent Posts';
+            break;
+          case 'oldest':
+            sortedPosts = [...postsData].sort((a, b) => new Date(a['post-date']) - new Date(b['post-date']));
+            document.getElementById('title').textContent = 'Old Posts';
+            break;
+          case 'a-z':
+            sortedPosts = [...postsData].sort((a, b) => a['post-title'].localeCompare(b['post-title']));
+            document.getElementById('title').textContent = 'Alphabet A';
+            break;
+          case 'z-a':
+            sortedPosts = [...postsData].sort((a, b) => b['post-title'].localeCompare(a['post-title']));
+            document.getElementById('title').textContent = 'Alphabet Z';
+            break;
+        }
+
+        document.querySelectorAll('.sortoption').forEach(option => option.classList.remove('active'));
+        document.querySelector(`.sortoption[onclick="sortPosts('${criteria}')"]`).classList.add('active');
+
+        renderPosts(sortedPosts);
+      }
     </script>
   </body>
 </html>
